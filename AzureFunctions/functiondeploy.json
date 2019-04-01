@@ -2,16 +2,61 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "appName": {
+    "department": {
+      "type": "string",
+      "defaultValue": "int",
+      "metadata": {
+        "description": "Name of department/team that owns, created and maintains the resource."
+      }
+    },
+    "environment": {
+      "type": "string",
+      "defaultValue": "dev",
+      "allowedValues": [
+        "dev",
+        "test",
+        "qa",
+        "prod"
+      ],
+      "metadata": {
+        "description": "The environment that this resource belongs to."
+      }
+    },
+    "solution": {
+      "type": "string",
+      "defaultValue": "ngdapi",
+      "metadata": {
+        "description": "The name of the solution that this resource belongs to within the Department."
+      }
+    },
+    "component": {
       "type": "string",
       "metadata": {
-        "description": "The name of the function app that you wish to create."
+        "description": "The name of the component within the solution (function app that you wish to create)"
+      }
+    },
+    "resource": {
+      "type": "string",
+      "defaultValue": "func",
+      "metadata": {
+        "description": "The abbrevated name of the Azure Resource/Service ."
+      }
+    },
+    "instance": {
+      "type": "string",
+      "defaultValue": "-",
+      "metadata": {
+        "description": "The abbrevated name of the Azure Resource/Service ."
       }
     },
     "storageAccountType": {
       "type": "string",
       "defaultValue": "Standard_LRS",
-      "allowedValues": ["Standard_LRS", "Standard_GRS", "Standard_RAGRS"],
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_RAGRS"
+      ],
       "metadata": {
         "description": "Storage Account type"
       }
@@ -26,17 +71,27 @@
     "runtime": {
       "type": "string",
       "defaultValue": "dotnet",
-      "allowedValues": [ "node", "dotnet", "java" ],
+      "allowedValues": [
+        "node",
+        "dotnet",
+        "java"
+      ],
       "metadata": {
         "description": "The language worker runtime to load in the function app."
       }
     }
   },
   "variables": {
-    "functionAppName": "[parameters('appName')]",
-    "hostingPlanName": "[parameters('appName')]",
-    "applicationInsightsName": "[parameters('appName')]",
-    "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'azfunctions')]",
+    "functionomponentString": "[concat('ng-',parameters('department'),'-',parameters('environment'),'-',parameters('solution'),'-',parameters('component'),'-',parameters('resource'),if(equals(parameters('instance'),'-'), '',concat('-',parameters('instance'))) )]",
+    "hostingPlanNameString": "[concat('ng-',parameters('department'),'-',parameters('environment'),'-',parameters('solution'),'-',parameters('component'),'-hp',if(equals(parameters('instance'),'-'), '',concat('-',parameters('instance'))) )]",
+    "applicationInsightsNameString": "[concat('ng-',parameters('department'),'-',parameters('environment'),'-',parameters('solution'),'-',parameters('component'),'-ins',if(equals(parameters('instance'),'-'), '',concat('-',parameters('instance'))) )]",
+    "storageAccountNameString": "[concat('ng',parameters('department'),parameters('environment'),parameters('solution'),parameters('component'),'stg',if(equals(parameters('instance'),'-'), '',parameters('instance')) )]",
+
+    "functionomponent": "[if(greater(length(variables('functionomponentString')), 60), substring(variables('functionomponentString'),0,59),variables('functionomponentString'))]",
+    "hostingPlanName": "[if(greater(length(variables('hostingPlanNameString')), 60), substring(variables('hostingPlanNameString'),0,59),variables('hostingPlanNameString'))]",
+    "applicationInsightsName": "[if(greater(length(variables('applicationInsightsNameString')), 60), substring(variables('applicationInsightsNameString'),0,59),variables('applicationInsightsNameString'))]",
+    "storageAccountName": "[if(greater(length(variables('storageAccountNameString')), 24), substring(variables('storageAccountNameString'),0,23),variables('storageAccountNameString'))]",
+
     "storageAccountid": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
     "functionWorkerRuntime": "[parameters('runtime')]"
   },
@@ -65,7 +120,7 @@
     {
       "apiVersion": "2015-08-01",
       "type": "Microsoft.Web/sites",
-      "name": "[variables('functionAppName')]",
+      "name": "[variables('functionomponent')]",
       "location": "[parameters('location')]",
       "kind": "functionapp",
       "dependsOn": [
@@ -90,7 +145,7 @@
             },
             {
               "name": "WEBSITE_CONTENTSHARE",
-              "value": "[toLower(variables('functionAppName'))]"
+              "value": "[toLower(variables('functionomponent'))]"
             },
             {
               "name": "FUNCTIONS_EXTENSION_VERSION",
