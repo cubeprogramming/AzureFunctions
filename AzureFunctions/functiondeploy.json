@@ -39,14 +39,14 @@
       "type": "string",
       "defaultValue": "func",
       "metadata": {
-        "description": "The abbrevated name of the Azure Resource/Service ."
+        "description": "The abbrevated name of the Azure Resource/Service."
       }
     },
     "instance": {
       "type": "string",
       "defaultValue": "-",
       "metadata": {
-        "description": "The abbrevated name of the Azure Resource/Service ."
+        "description": "Add the instance-number of the resource/service, if you need more than one instance of the resource."
       }
     },
     "storageAccountType": {

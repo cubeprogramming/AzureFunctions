@@ -29,6 +29,8 @@
       <Visible>False</Visible>
     </None>
     <Content Include="Deploy-AzureResourceGroup.ps1" />
+    <None Include="Functions ARM-CD.yaml" />
+    <None Include="Functions_ARM-CI.yaml" />
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
 </Project>
